@@ -1,0 +1,24 @@
+# Environment Variables & Secrets
+.env
+*.env
+!.env.example
+
+# Python
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# User Exclusions
+tests/
+standards.md
+
+# IDE & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

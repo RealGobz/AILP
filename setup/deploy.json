@@ -1,0 +1,590 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.47.16.16243",
+      "templateHash": "1516688810391779432"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('ailpstorage{0}', uniqueString(resourceGroup().id))]"
+    },
+    "docIntelligenceName": {
+      "type": "string",
+      "defaultValue": "[format('ailp-docintel-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "contentSafetyName": {
+      "type": "string",
+      "defaultValue": "[format('ailp-contentsafety-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "sessionPoolName": {
+      "type": "string",
+      "defaultValue": "[format('sessions-ailp-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "foundryAccountName": {
+      "type": "string",
+      "defaultValue": "[format('foundry-ailp-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "foundryProjectName": {
+      "type": "string",
+      "defaultValue": "[format('project-ailp-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "searchServiceName": {
+      "type": "string",
+      "defaultValue": "[format('search-ailp-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "embeddingModelDeploymentName": {
+      "type": "string",
+      "defaultValue": "text-embedding-3-small"
+    },
+    "chatModelDeploymentName": {
+      "type": "string",
+      "defaultValue": "agent-llm"
+    },
+    "ltmModelDeploymentName": {
+      "type": "string",
+      "defaultValue": "ltm-agent-llm"
+    },
+    "tutorExtractorDeploymentName": {
+      "type": "string",
+      "defaultValue": "tutor-extractor-llm"
+    },
+    "cosmosAccountName": {
+      "type": "string",
+      "defaultValue": "[format('cosmos-ailp-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "cosmosDatabaseName": {
+      "type": "string",
+      "defaultValue": "CosmosStore"
+    },
+    "cosmosContainerName": {
+      "type": "string",
+      "defaultValue": "store"
+    },
+    "cosmosCheckpointsContainerName": {
+      "type": "string",
+      "defaultValue": "checkpoints"
+    },
+    "cosmosUserGradingsContainerName": {
+      "type": "string",
+      "defaultValue": "UserGradings"
+    },
+    "cosmosThroughput": {
+      "type": "int",
+      "defaultValue": 400
+    },
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "defaultValue": "[format('law-ailp-{0}', uniqueString(resourceGroup().id))]"
+    },
+    "appInsightsName": {
+      "type": "string",
+      "defaultValue": "[format('appinsights-ailp-{0}', uniqueString(resourceGroup().id))]"
+    }
+  },
+  "resources": {
+    "storageAccount": {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[toLower(parameters('storageAccountName'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot"
+      }
+    },
+    "blobServices": {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}', toLower(parameters('storageAccountName')), 'default')]",
+      "dependsOn": [
+        "storageAccount"
+      ]
+    },
+    "docIntelligence": {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('docIntelligenceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "FormRecognizer",
+      "properties": {
+        "customSubDomainName": "[parameters('docIntelligenceName')]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    "contentSafety": {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('contentSafetyName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "ContentSafety",
+      "properties": {
+        "customSubDomainName": "[toLower(parameters('contentSafetyName'))]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    "sessionPool": {
+      "type": "Microsoft.App/sessionPools",
+      "apiVersion": "2024-08-02-preview",
+      "name": "[parameters('sessionPoolName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "poolManagementType": "Dynamic",
+        "containerType": "PythonLTS",
+        "scaleConfiguration": {
+          "maxConcurrentSessions": 20,
+          "readySessionInstances": 0
+        },
+        "dynamicPoolConfiguration": {
+          "executionType": "Timed",
+          "cooldownPeriodInSeconds": 300
+        }
+      }
+    },
+    "aiFoundry": {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2025-06-01",
+      "name": "[parameters('foundryAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "AIServices",
+      "properties": {
+        "customSubDomainName": "[toLower(parameters('foundryAccountName'))]",
+        "publicNetworkAccess": "Enabled",
+        "allowProjectManagement": true
+      }
+    },
+    "embeddingModel": {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}', parameters('foundryAccountName'), parameters('embeddingModelDeploymentName'))]",
+      "sku": {
+        "name": "Standard",
+        "capacity": 20
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "text-embedding-3-small",
+          "version": "1"
+        }
+      },
+      "dependsOn": [
+        "aiFoundry"
+      ]
+    },
+    "chatModel": {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}', parameters('foundryAccountName'), parameters('chatModelDeploymentName'))]",
+      "sku": {
+        "name": "GlobalStandard",
+        "capacity": 1000
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "gpt-5-mini",
+          "version": "2025-08-07"
+        }
+      },
+      "dependsOn": [
+        "aiFoundry",
+        "embeddingModel"
+      ]
+    },
+    "ltmModel": {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}', parameters('foundryAccountName'), parameters('ltmModelDeploymentName'))]",
+      "sku": {
+        "name": "GlobalStandard",
+        "capacity": 20
+      },
+      "properties": {
+        "model": {
+          "format": "Microsoft",
+          "name": "Phi-4",
+          "version": "7"
+        }
+      },
+      "dependsOn": [
+        "aiFoundry",
+        "chatModel"
+      ]
+    },
+    "tutorExtractorModel": {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}', parameters('foundryAccountName'), parameters('tutorExtractorDeploymentName'))]",
+      "sku": {
+        "name": "GlobalStandard",
+        "capacity": 20
+      },
+      "properties": {
+        "model": {
+          "format": "DeepSeek",
+          "name": "DeepSeek-V4-Flash",
+          "version": "2026-04-23"
+        }
+      },
+      "dependsOn": [
+        "aiFoundry",
+        "ltmModel"
+      ]
+    },
+    "aiProject": {
+      "type": "Microsoft.CognitiveServices/accounts/projects",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}', parameters('foundryAccountName'), parameters('foundryProjectName'))]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "AILP Azure AI Foundry Project",
+        "displayName": "AILP Project"
+      },
+      "dependsOn": [
+        "aiFoundry",
+        "tutorExtractorModel"
+      ]
+    },
+    "logAnalyticsWorkspace": {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[toLower(parameters('logAnalyticsWorkspaceName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    "appInsights": {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[toLower(parameters('appInsightsName'))]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', toLower(parameters('logAnalyticsWorkspaceName')))]"
+      },
+      "dependsOn": [
+        "logAnalyticsWorkspace"
+      ]
+    },
+    "appInsightsConnection": {
+      "type": "Microsoft.CognitiveServices/accounts/projects/connections",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}/{2}', parameters('foundryAccountName'), parameters('foundryProjectName'), 'appinsights-connection')]",
+      "properties": {
+        "category": "AppInsights",
+        "target": "[resourceId('Microsoft.Insights/components', toLower(parameters('appInsightsName')))]",
+        "authType": "ApiKey",
+        "metadata": {
+          "ApiType": "Azure",
+          "ResourceId": "[resourceId('Microsoft.Insights/components', toLower(parameters('appInsightsName')))]"
+        },
+        "credentials": {
+          "key": "[reference('appInsights').ConnectionString]"
+        }
+      },
+      "dependsOn": [
+        "aiProject",
+        "appInsights"
+      ]
+    },
+    "searchService": {
+      "type": "Microsoft.Search/searchServices",
+      "apiVersion": "2023-11-01",
+      "name": "[toLower(parameters('searchServiceName'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "basic"
+      },
+      "properties": {
+        "semanticSearch": "free",
+        "publicNetworkAccess": "enabled",
+        "authOptions": {
+          "aadOrApiKey": {
+            "aadAuthFailureMode": "http401WithBearerChallenge"
+          }
+        }
+      }
+    },
+    "cosmosAccount": {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2023-11-15",
+      "name": "[toLower(parameters('cosmosAccountName'))]",
+      "location": "[parameters('location')]",
+      "kind": "GlobalDocumentDB",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "locations": [
+          {
+            "locationName": "[parameters('location')]",
+            "failoverPriority": 0,
+            "isZoneRedundant": false
+          }
+        ],
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        }
+      }
+    },
+    "sqlDatabase": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}', toLower(parameters('cosmosAccountName')), parameters('cosmosDatabaseName'))]",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosDatabaseName')]"
+        }
+      },
+      "dependsOn": [
+        "cosmosAccount"
+      ]
+    },
+    "sqlContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', toLower(parameters('cosmosAccountName')), parameters('cosmosDatabaseName'), parameters('cosmosContainerName'))]",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/prefix"
+            ],
+            "kind": "Hash"
+          },
+          "defaultTtl": -1,
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        },
+        "options": {
+          "throughput": "[parameters('cosmosThroughput')]"
+        }
+      },
+      "dependsOn": [
+        "sqlDatabase"
+      ]
+    },
+    "sqlCheckpointsContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', toLower(parameters('cosmosAccountName')), parameters('cosmosDatabaseName'), parameters('cosmosCheckpointsContainerName'))]",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosCheckpointsContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/partition_key"
+            ],
+            "kind": "Hash"
+          },
+          "defaultTtl": -1,
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        },
+        "options": {
+          "throughput": "[parameters('cosmosThroughput')]"
+        }
+      },
+      "dependsOn": [
+        "sqlDatabase"
+      ]
+    },
+    "sqlUserGradingsContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', toLower(parameters('cosmosAccountName')), parameters('cosmosDatabaseName'), parameters('cosmosUserGradingsContainerName'))]",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosUserGradingsContainerName')]",
+          "partitionKey": {
+            "paths": [
+              "/userId"
+            ],
+            "kind": "Hash"
+          },
+          "defaultTtl": -1,
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ]
+          }
+        },
+        "options": {
+          "throughput": "[parameters('cosmosThroughput')]"
+        }
+      },
+      "dependsOn": [
+        "sqlDatabase"
+      ]
+    }
+  },
+  "outputs": {
+    "storageAccountName": {
+      "type": "string",
+      "value": "[toLower(parameters('storageAccountName'))]"
+    },
+    "storageAccountId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+    },
+    "connectionString": {
+      "type": "securestring",
+      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net', toLower(parameters('storageAccountName')), listKeys('storageAccount', '2023-05-01').keys[0].value)]"
+    },
+    "endpoint": {
+      "type": "string",
+      "value": "[reference('docIntelligence').endpoint]"
+    },
+    "contentSafetyName": {
+      "type": "string",
+      "value": "[parameters('contentSafetyName')]"
+    },
+    "contentSafetyEndpoint": {
+      "type": "string",
+      "value": "[reference('contentSafety').endpoint]"
+    },
+    "foundryAccountName": {
+      "type": "string",
+      "value": "[parameters('foundryAccountName')]"
+    },
+    "foundryEndpoint": {
+      "type": "string",
+      "value": "[reference('aiFoundry').endpoint]"
+    },
+    "foundryProjectName": {
+      "type": "string",
+      "value": "[parameters('foundryProjectName')]"
+    },
+    "embeddingDeploymentName": {
+      "type": "string",
+      "value": "[parameters('embeddingModelDeploymentName')]"
+    },
+    "chatDeploymentName": {
+      "type": "string",
+      "value": "[parameters('chatModelDeploymentName')]"
+    },
+    "ltmDeploymentName": {
+      "type": "string",
+      "value": "[parameters('ltmModelDeploymentName')]"
+    },
+    "tutorExtractorDeploymentName": {
+      "type": "string",
+      "value": "[parameters('tutorExtractorDeploymentName')]"
+    },
+    "searchServiceName": {
+      "type": "string",
+      "value": "[toLower(parameters('searchServiceName'))]"
+    },
+    "searchServiceEndpoint": {
+      "type": "string",
+      "value": "[format('https://{0}.search.windows.net', toLower(parameters('searchServiceName')))]"
+    },
+    "cosmosAccountName": {
+      "type": "string",
+      "value": "[toLower(parameters('cosmosAccountName'))]"
+    },
+    "cosmosEndpoint": {
+      "type": "string",
+      "value": "[reference('cosmosAccount').documentEndpoint]"
+    },
+    "databaseId": {
+      "type": "string",
+      "value": "[parameters('cosmosDatabaseName')]"
+    },
+    "containerId": {
+      "type": "string",
+      "value": "[parameters('cosmosContainerName')]"
+    },
+    "checkpointsContainerId": {
+      "type": "string",
+      "value": "[parameters('cosmosCheckpointsContainerName')]"
+    },
+    "userGradingsContainerId": {
+      "type": "string",
+      "value": "[parameters('cosmosUserGradingsContainerName')]"
+    },
+    "sessionPoolName": {
+      "type": "string",
+      "value": "[parameters('sessionPoolName')]"
+    },
+    "sessionPoolManagementEndpoint": {
+      "type": "string",
+      "value": "[reference('sessionPool').poolManagementEndpoint]"
+    },
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "value": "[toLower(parameters('logAnalyticsWorkspaceName'))]"
+    },
+    "appInsightsName": {
+      "type": "string",
+      "value": "[toLower(parameters('appInsightsName'))]"
+    },
+    "appInsightsConnectionString": {
+      "type": "string",
+      "value": "[reference('appInsights').ConnectionString]"
+    },
+    "appInsightsInstrumentationKey": {
+      "type": "string",
+      "value": "[reference('appInsights').InstrumentationKey]"
+    }
+  }
+}

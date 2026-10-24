@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AILP — AI Curriculum & Tutor Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-dark">
+    <!-- Background glowing ambient orbs -->
+    <div class="ambient-glow orb-1"></div>
+    <div class="ambient-glow orb-2"></div>
+    <div class="ambient-glow orb-3"></div>
+
+    <div class="app-layout">
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-badge">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="header-title">
+                    <h1>AILP Tutor Intelligence</h1>
+                    <span class="version-tag">Agent v2.0 • LangGraph</span>
+                </div>
+            </div>
+
+            <div class="header-center">
+                <div class="session-pill" id="session-pill">
+                    <span class="pulse-indicator"></span>
+                    <span id="pill-user-name">Ahmed</span> • Grade <span id="pill-grade">10</span> • Thread #<span id="pill-thread">31</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button class="nav-btn" id="btn-toggle-config" title="Toggle Configuration (Phase 1)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Config</span>
+                </button>
+                <button class="nav-btn" id="btn-clear-chat" title="Clear Chat History">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body: Split or Toggle View -->
+        <main class="app-main">
+            
+            <!-- PHASE 1: CONFIGURATION PANEL -->
+            <section class="config-section" id="config-section">
+                <div class="config-card">
+                    <div class="config-header">
+                        <div class="step-indicator">
+                            <span class="badge-step">PHASE 1</span>
+                            <h2>Student & Session Configuration</h2>
+                        </div>
+                        <p class="config-subtitle">Configure your identity, academic grade, and study parameters. Pre-filled with active defaults.</p>
+                    </div>
+
+                    <form id="config-form" class="config-form" onsubmit="return false;">
+                        <div class="form-grid">
+                            <!-- Student Name -->
+                            <div class="form-group">
+                                <label for="cfg-name">Student Name</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    <input type="text" id="cfg-name" name="name" value="Ahmed" required>
+                                </div>
+                            </div>
+
+                            <!-- Grade -->
+                            <div class="form-group">
+                                <label for="cfg-grade">Grade / Year</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    <input type="text" id="cfg-grade" name="grade" value="10" placeholder="e.g. 10" required>
+                                </div>
+                            </div>
+
+                            <!-- Thread ID -->
+                            <div class="form-group">
+                                <label for="cfg-thread-id">Thread ID (Session Memory)</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>
+                                    <input type="text" id="cfg-thread-id" name="thread_id" value="31" required>
+                                </div>
+                            </div>
+
+                            <!-- User ID -->
+                            <div class="form-group">
+                                <label for="cfg-user-id">User ID (Cosmos DB Store)</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    <input type="text" id="cfg-user-id" name="user_id" value="1" required>
+                                </div>
+                            </div>
+
+                            <!-- Age -->
+                            <div class="form-group">
+                                <label for="cfg-age">Age</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <input type="number" id="cfg-age" name="age" value="16" min="5" max="100">
+                                </div>
+                            </div>
+
+                            <!-- Gender -->
+                            <div class="form-group">
+                                <label for="cfg-gender">Gender</label>
+                                <div class="input-wrapper">
+                                    <select id="cfg-gender" name="gender">
+                                        <option value="Male" selected>Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Not specified">Not specified</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Preferred Language -->
+                            <div class="form-group">
+                                <label for="cfg-language">Language</label>
+                                <div class="input-wrapper">
+                                    <select id="cfg-language" name="language">
+                                        <option value="Arabic" selected>Arabic (العربية)</option>
+                                        <option value="English">English</option>
+                                        <option value="French">French</option>
+                                        <option value="German">German</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Country -->
+                            <div class="form-group">
+                                <label for="cfg-country">Country</label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                    <input type="text" id="cfg-country" name="country" value="Egypt">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Toggle: Exam Prep Mode -->
+                        <div class="form-row-switch">
+                            <div class="switch-info">
+                                <span class="switch-title">Exam Preparation Mode</span>
+                                <span class="switch-desc">Enables rigorous testing persona, exam focus, and direct question answering.</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="cfg-exam-prep" name="exam_prep">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Attached Image Configuration -->
+                        <div class="form-group image-cfg-group">
+                            <label for="cfg-image-path">Attached Vision Image (Path or Upload)</label>
+                            <div class="image-input-box">
+                                <input type="text" id="cfg-image-path" name="images" value="F:\Projects\AILP\tests\data\image.png" placeholder="File path or image URL">
+                                <label class="btn-file-upload" for="file-upload-input" title="Upload local image">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                    <span>Browse</span>
+                                    <input type="file" id="file-upload-input" accept="image/*" style="display: none;">
+                                </label>
+                            </div>
+                            <div id="image-preview-container" class="image-preview-pill">
+                                <span class="img-badge">Active Image:</span>
+                                <span id="img-preview-name" class="img-name">image.png</span>
+                                <button type="button" class="btn-remove-img" id="btn-clear-image" title="Clear image">×</button>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-actions">
+                            <button type="button" id="btn-save-config" class="btn-primary glow-button">
+                                <span>Save & Continue to Chat</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- PHASE 2: CHAT & AGENT INSPECTION WORKSPACE -->
+            <section class="chat-section" id="chat-section">
+                <!-- Chat Feed Container -->
+                <div class="chat-feed" id="chat-feed">
+                    <!-- Welcome Card -->
+                    <div class="message-card system-welcome" id="system-welcome">
+                        <div class="welcome-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <div class="welcome-content">
+                            <h3>AILP Student Workspace Ready</h3>
+                            <p>Ask a question about your curriculum, request a quiz, solve math & physics problems, or explore lessons. Every agent action, tool invocation, and node latency is inspected live below.</p>
+                            <div class="quick-prompts">
+                                <button class="btn-chip" onclick="quickPrompt('hi what is in the image')">📸 Analyze Attached Image</button>
+                                <button class="btn-chip" onclick="quickPrompt('Can you explain photosynthesis step by step?')">🌱 Explain Photosynthesis</button>
+                                <button class="btn-chip" onclick="quickPrompt('Give me a 3 question multiple choice quiz on my science topic')">📝 Quiz Me</button>
+                                <button class="btn-chip" onclick="quickPrompt('What do you remember about my study preferences?')">🧠 Check LTM Memory</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Dock -->
+                <div class="chat-input-dock">
+                    <div class="input-container">
+                        <div class="attached-chip-row" id="attached-chip-row" style="display: none;">
+                            <span class="chip-label">Attached to next turn:</span>
+                            <span class="chip-filename" id="chip-filename">image.png</span>
+                            <button type="button" class="chip-remove" id="btn-remove-chip">×</button>
+                        </div>
+
+                        <div class="input-box">
+                            <textarea 
+                                id="user-input-text" 
+                                rows="1" 
+                                placeholder="Type your question or instruction here... (Shift+Enter for newline)"
+                                autofocus
+                            ></textarea>
+
+                            <div class="input-buttons">
+                                <label class="btn-icon" for="chat-image-upload" title="Attach an image">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                    <input type="file" id="chat-image-upload" accept="image/*" style="display: none;">
+                                </label>
+                                
+                                <button id="btn-send-message" class="btn-send" title="Send (Enter)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-footer">
+                            <span class="hint-text">LangGraph Node Execution & Tool Tracing Enabled</span>
+                            <span class="shortcuts-text"><b>Enter</b> to send • <b>Shift+Enter</b> for new line</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

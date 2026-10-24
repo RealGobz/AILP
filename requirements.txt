@@ -1,0 +1,16 @@
+azure-storage-blob
+azure-identity
+python-dotenv
+azure-ai-documentintelligence
+llama-index-core
+tiktoken
+azure-search-documents
+openai
+langgraph
+langchain-core
+langchain-azure-ai
+azure-cosmos
+langchain-azure-cosmosdb
+langchain-azure-dynamic-sessions
+azure-monitor-opentelemetry
+opentelemetry-api
